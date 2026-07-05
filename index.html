@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Overflight Monitor</title>
+<title>Audio Flight Monitor</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
@@ -13,7 +13,7 @@
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:12px;}
-  h1{font-size:16px;margin:0 0 4px;}
+  h1{font-size:24px;margin:0 0 4px;}
   .sub{color:var(--dim);font-size:12px;margin-bottom:14px;}
   .grid{display:grid;grid-template-columns:1fr;gap:12px;max-width:900px;margin:0 auto;}
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;}
@@ -35,6 +35,7 @@
   .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
   table{width:100%;border-collapse:collapse;font-size:12px;min-width:480px;}
   th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .eta-col{font-weight:700;font-size:1.15em;color:var(--accent);}
   th{color:var(--dim);font-weight:500;font-size:10px;text-transform:uppercase;}
   tr.imminent td{color:var(--danger);}
   tr.soon td{color:var(--warn);}
@@ -51,7 +52,7 @@
 <body>
 <div class="grid">
   <div>
-    <h1>Overflight Monitor</h1>
+    <h1>Audio Flight Monitor</h1>
     <div class="sub">Live ADS-B via adsb.one · target: <span id="targetLabel">not set</span></div>
     <div class="panel" style="padding:10px;margin-bottom:12px;">
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -84,9 +85,9 @@
     <div class="table-wrap">
     <table>
       <thead>
-        <tr><th>Callsign</th><th>Alt (ft)</th><th>ETA</th></tr>
+        <tr><th>Callsign</th><th>Alt (ft)</th><th>Dist</th><th class="eta-col">ETA</th></tr>
       </thead>
-      <tbody id="tbody"><tr><td colspan="3" class="empty">Waiting for data…</td></tr></tbody>
+      <tbody id="tbody"><tr><td colspan="4" class="empty">Waiting for data…</td></tr></tbody>
     </table>
     </div>
   </div>
@@ -201,7 +202,7 @@ function render(candidates, errMsg){
   }
 
   if (!candidates || candidates.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="3" class="empty">No aircraft currently projected over target</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" class="empty">No aircraft currently projected over target</td></tr>`;
     hero.className = 'hero clear';
     heroEta.textContent = '–';
     heroLabel.textContent = 'No aircraft tracking toward target';
@@ -214,7 +215,8 @@ function render(candidates, errMsg){
     return `<tr class="${cls}">
       <td>${c.callsign}</td>
       <td>${c.altFt ?? '–'}</td>
-      <td>${fmtTime(c.eta)}</td>
+      <td>${fmtDist(c.distNow)}</td>
+      <td class="eta-col">${fmtTime(c.eta)}</td>
     </tr>`;
   }).join('');
   tbody.innerHTML = rows;
